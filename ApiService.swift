@@ -74,7 +74,7 @@ final class ApiService {
 
     func health() async throws -> String {
         struct Health: Decodable { let status: String }
-        let h: Health = try await request("/api/health") ?? Health(status: "DOWN")
+        let h: Health = try await request("/api/health")
         return h.status
     }
 
@@ -82,7 +82,7 @@ final class ApiService {
 
     private func request<T: Decodable>(_ path: String,
                                        method: String = "GET",
-                                       body: [String: Any]? = nil) async throws -> T? {
+                                       body: [String: Any]? = nil) async throws -> T {
         guard let url = URL(string: baseURL + path) else { throw ApiError.badURL }
         var req = URLRequest(url: url)
         req.httpMethod = method
@@ -96,7 +96,9 @@ final class ApiService {
             throw ApiError.server("服务器错误(\(http.statusCode))")
         }
         let result = try JSONDecoder().decode(ApiResult<T>.self, from: data)
-        guard result.code == 0 else { throw ApiError.server(result.msg ?? "未知错误") }
-        return result.data
+        guard result.code == 0, let payload = result.data else {
+            throw ApiError.server(result.msg ?? "未知错误")
+        }
+        return payload
     }
 }
