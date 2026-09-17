@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 // 主界面：选择设备 → 编辑内容 → 发送 → 查看记录
 struct HomeView: View {
